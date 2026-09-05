@@ -215,6 +215,83 @@ const styleMotionGen45: Record<Style, string> = {
   ebs:          "[00:00] Color bars hold on screen. Harsh tone. [00:02] Text flashes urgently on the black bar. [00:04] Static. Alert.",
 };
 
+// Veo 3.1 (Google direct path) ignores the [00:00] timestamp syntax that gen4.5 uses —
+// Google's Veo guide documents descriptive prose, not a timestamped beat sheet, so the
+// bracketed cues become literal characters and the pacing silently dies. This is the
+// dedicated Veo motion map: flowing prose only, positive phrasing only (the models ignore
+// or invert negatives), order = subject stillness → background animation → camera. It is
+// seeded from the proven prose in `styleMotion` and is meant to be tuned independently of
+// the Runway maps. Audio is muxed separately (netflix.wav), so Veo's native audio is
+// suppressed at the API layer (config.generateAudio=false) rather than described here.
+const styleMotionVeo: Record<Style, string> = {
+  cinematic:
+    "The logo holds centered and legible while a slow golden breath swells warm light across the letterforms, brightening then dimming. Around the glowing text, golden light particles drift upward and atmospheric haze rolls slowly across the dark background. A subtle lens flare blooms in from the right edge. The camera pushes forward in a slow, steady dolly. Cinematic and dramatic, unhurried.",
+
+  retro:
+    "The logo flickers on like a neon sign, letterforms buzzing with electric intensity variations, then holds steady and sharp. A single horizontal scanline sweeps across the frame. Neon edge-glow pulses rhythmically around the letters while electric sparks radiate from the corners. A CRT vignette pulses gently at the edges. The camera stays locked and static. 80s synthwave.",
+
+  futuristic:
+    "The logo glitches and assembles as chromatic aberration ripples through the letterforms, then snaps to crisp clarity and holds. Holographic scan lines sweep over the composition. Bright cyan particles radiate outward from the letters and drift slowly away into the space-black background. The camera stays locked and static. Sci-fi, sleek.",
+
+  minimal:
+    "The logo rests centered and perfectly still. A single soft white light sweep travels slowly from left to right across the letterforms, brightening them gently as it passes, then exits the frame. A barely perceptible warmth lingers on the text. The camera stays locked and static. Clean, minimal, unhurried.",
+
+  horror:
+    "The logo holds still while candleflicker lighting pulses across the letterforms with eerie warmth variations. Deep red smoke curls slowly upward from the base of the frame. A creeping shadow vignette closes gradually inward from all four edges, tightening around the flickering text. The camera stays locked and static. Gothic, eerie, atmospheric.",
+
+  anime:
+    "The letterforms slam into the center of frame, thick-outlined and vibrating with power, then hold sharp. Speed lines explode outward from center and a white-hot energy burst ignites behind the logo. An electric aura pulses around the text, deep blue on the outer rim and white-hot at the core, while energy particles shower downward. The camera stays locked and static. Intense, high-energy shonen anime.",
+
+  adultswim:
+    "Two or three lines of white Helvetica Condensed text sit dead center on a pure black field, holding completely still and deadpan. The small lowercase brand mark in square brackets rests quietly in the lower corner, subordinate and unassuming. A single faint scan line flickers once across the frame and vanishes. Nothing else moves; the stillness is absolute. The camera stays locked and static.",
+
+  cartoon:
+    "Individual black-and-white checkerboard tiles fly in from every direction and snap into a perfect square grid, then lock. Cartoon body parts — ears, eyes, hands — briefly peek from single squares and pull back as the tiles settle. The letter tiles flip to reveal 'CARTOON' stacked over 'NETWORK' in Eagle Bold. Maximum-saturation color flashes — fire engine red, cobalt blue, canary yellow — burst from the tiles as the complete logo settles, flat with zero gradients. The camera stays locked and static.",
+
+  vhs:
+    "The logo stutters into view as horizontal tracking-error bands sweep across the frame and the letterforms struggle to lock in, color bleeding laterally from the text. A timestamp blinks in the lower corner. The image rolls and warps with analog instability, scan lines flickering, then stabilizes briefly before juddering again with magnetic dropout noise, the logo holding through the interference. The camera stays locked and static. Lo-fi, analog, degraded.",
+
+  grindhouse:
+    "Kaleidoscopic concentric rings pulse continuously outward from center in maximum saturation of every color at once — electric red, acid orange, lime green, cobalt blue, hot magenta, gold-yellow — while a warm amber-pink orb at the center expands and contracts. The all-caps logo snipes in from the four corners simultaneously with hard mechanical linear motion and no easing, converging at center. Heavy film grain drifts across the entire frame. The camera stays locked and static. Maximum saturation, maximum intent.",
+
+  lofi:
+    "The logo drifts gently into the cozy frame and settles as if it belongs there. Rain trickles slowly down the window behind the scene, warm amber lamp light pulses softly, and steam curls lazily upward from off-frame. The logo breathes quietly with the scene as a gentle warmth washes through the image. The camera stays locked and static. Peaceful, cozy, hypnotic.",
+
+  vaporwave:
+    "The white marble Apollo bust floats and rotates imperceptibly in the deep purple digital void while the flat magenta-and-cyan perspective grid pulses slowly toward the magenta-to-indigo horizon and the semicircle sun breathes, rising slightly then falling. Full-width Japanese katakana drifts with subtle VHS tracking displacement. RGB chromatic aberration pulses across every element, red shifting left and blue shifting right into prismatic fringing, then snaps back; VHS scan lines sweep slowly upward at low opacity. The camera stays locked and static. Dreamy, surreal, hypnotic.",
+
+  cyberpunk:
+    "Neon rain falls through dark, smog-thick air, streaks of red and blue neon catching in the fog above a towering mega-city silhouette. The logo materializes glowing with electric neon energy against the darkness and holds, its light reflecting on the rain-slicked surfaces below. Fog drifts slowly between the towers while distant neon signs flicker, and the logo pulses, breathing and dangerous. The camera stays locked and static. Dark, atmospheric, dystopian.",
+
+  hbo:
+    "Pure high-contrast analog television static fills the frame in dense black-and-white snow, holding for a beat. The massive chrome-plated brass 3D letterforms phase in through the noise as a broadcast signal locking in, thick beveled letters with hard specular highlights on every edge, and the static recedes. Inside the letter O a spinning disc of fiber-optic light rays ignites — electric blue, crimson, gold and emerald beams rotating outward — while a warm amber glow pulses from below. The camera stays locked and static. Prestige, broadcast, definitive.",
+
+  epic:
+    "The logo rises into frame from below as if cresting a ridge, letterforms scaling up and settling at center. A golden sunburst erupts from directly behind the text, warm light intensifying and spreading outward, while dust and debris blast outward and drift into the foreground. The camera eases into a very slow dolly in. Bronze and amber tones, cinematic widescreen.",
+
+  nature:
+    "The logo drifts softly into center frame, swaying gently as if carried by a breeze, then settles. Golden morning light washes slowly from left to right across the letterforms while a few leaf particles drift lazily past the foreground and soft atmospheric haze moves in the background. The camera stays locked and static. Organic, peaceful, documentary.",
+
+  prestige:
+    "The crimson wordmark snaps into view crisp, bold and vivid red with a single pulse of light, then holds sharp and fully legible. One explosive beat follows: thin vertical bands of deep crimson and dark maroon burst outward from behind the letterforms simultaneously to the left and right, ribbons of color shooting to the edges and filling the full width of the frame in under a second, holding for a half-beat before dissolving away. The logo settles with a final glow against the black background. The camera stays locked and static throughout. Premium, definitive.",
+
+  blockbuster:
+    "A warm golden-yellow spotlight ignites at center and floods incandescent light outward across the deep navy background. The bold block letters radiate a buzzing fluorescent-warm glow, and the film-strip perforations along the top and bottom edges rattle with a subtle vibration. That familiar store-opening energy fills the frame, bright and cheerful, as the logo holds. The camera stays locked and static. Nostalgic, golden, late-80s retail.",
+
+  dreamworks:
+    "Clouds drift slowly across a soft blue sky as the crescent moon glows and the small figure rests on it. The camera drifts gently upward through the clouds. Dreamy and cinematic.",
+  tristar:
+    "The Pegasus gallops powerfully in mid-air, wings beating, as churning clouds and golden light surge behind it. The camera holds on the dynamic, epic reveal.",
+  hannabarbera:
+    "The rainbow swirl animates on pure black as the chrome star flies along its arc and settles at center. Retro broadcast cel-animation energy. The camera stays locked and static.",
+  columbia:
+    "Light beams sweep slowly across the warm sky as the clouds churn and the torch shines, the classical figure holding aloft. A stately, cinematic logo reveal. The camera stays locked and static.",
+  mst3k:
+    "The asteroid rotates slowly in deep purple-blue space as stars twinkle and the silhouetted theater figures point and gesture from their seats. Campy, low-fi sci-fi energy. The camera stays locked and static.",
+  ebs:
+    "The SMPTE color bars hold steady on screen as a harsh tone pulses and the monospace text flashes urgently across the frame. Alert, clinical, unmistakable. The camera stays locked and static.",
+};
+
 const styleBackground: Record<Style, string> = {
   cinematic:  "Background: deep dark navy, almost black.",
   retro:      "Background: very dark, near-black with subtle grid.",
@@ -293,9 +370,17 @@ export function buildPrompts(params: GenerationParams): PromptPreview {
     imagePrompt = `${bg}Streaming service logo for "${upper}"${taglinePart}, ${treatmentImage[treatment]}, bold dramatic typography, ${styleDescriptions[style]}, professional logo design, no people${colorPart}${notesPart}`;
   }
 
-  // Gen4.5 supports timestamp-based sequencing — use the more precise version.
+  // Motion map selection is transport-aware:
+  //   gen4.5 (Runway)  → timestamped beat sheet (styleMotionGen45)
+  //   veo* (Google)    → flowing prose, no timestamps (styleMotionVeo)
+  //   everything else  → plain prose (styleMotion)
   const isGen45 = videoModel === "gen4.5";
-  const motion = isGen45 ? styleMotionGen45[style] : styleMotion[style];
+  const isVeo = videoModel === "veo3" || videoModel === "veo3.1" || videoModel === "veo3.1_fast";
+  const motion = isVeo
+    ? styleMotionVeo[style]
+    : isGen45
+      ? styleMotionGen45[style]
+      : styleMotion[style];
 
   // Positive-phrasing only — no "don't/no/never" (models ignore or invert negatives).
   // Structure: subject stillness declared first, then background animation, then camera.

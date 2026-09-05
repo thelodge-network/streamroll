@@ -282,6 +282,10 @@ export default function Home() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [error, setError]       = useState<string | null>(null);
+  // Lodge fork (#1629): server-side mux + write straight into the media library.
+  const [savingToMedia, setSavingToMedia] = useState(false);
+  const [savedMediaPath, setSavedMediaPath] = useState<string | null>(null);
+  const [saveMediaError, setSaveMediaError] = useState<string | null>(null);
   const [showPrompt, setShowPrompt] = useState(true);
   const [showInstall, setShowInstall] = useState(false);
   const [logoMode, setLogoMode] = useState<LogoMode>("ai");
@@ -419,6 +423,27 @@ export default function Home() {
   function stopImageProgress(complete: boolean) {
     if (imageProgressRef.current) { clearInterval(imageProgressRef.current); imageProgressRef.current = null; }
     setImageProgress(complete ? 100 : 0);
+  }
+
+  async function saveToMediaLibrary() {
+    if (!videoUrl) return;
+    setSavingToMedia(true);
+    setSaveMediaError(null);
+    track("Saved To Media", { style });
+    try {
+      const res = await fetch("/api/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ videoUrl, name, audio: true }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Save failed");
+      setSavedMediaPath(data.hostPath || data.path);
+    } catch (e) {
+      setSaveMediaError(e instanceof Error ? e.message : "Save failed");
+    } finally {
+      setSavingToMedia(false);
+    }
   }
 
   async function downloadPoster() {
@@ -2354,8 +2379,28 @@ export default function Home() {
                     >
                       Download MP4
                     </a>
+                    <button
+                      onClick={saveToMediaLibrary}
+                      disabled={savingToMedia}
+                      title="Mux the sting server-side and write the finished mp4 straight into /media/Pre-Rolls"
+                      className="text-sm font-medium px-4 py-1.5 rounded transition-all border disabled:opacity-60"
+                      style={savedMediaPath
+                        ? { background: "transparent", borderColor: accentColor, color: accentColor }
+                        : { background: accentColor, borderColor: accentColor, color: "#000" }}
+                    >
+                      {savingToMedia ? "Saving…" : savedMediaPath ? "✓ Saved to media" : "Save to Media Library"}
+                    </button>
                   </div>
                 </div>
+                {(savedMediaPath || saveMediaError) && (
+                  <div className="px-3 py-2 bg-neutral-950 border-t border-neutral-800 text-xs">
+                    {savedMediaPath ? (
+                      <span className="text-neutral-400">Saved to <code className="text-neutral-200">{savedMediaPath}</code> — your media server can read it now.</span>
+                    ) : (
+                      <span className="text-red-400">{saveMediaError}</span>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 

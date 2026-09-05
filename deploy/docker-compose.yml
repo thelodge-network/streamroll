@@ -1,0 +1,25 @@
+services:
+  streamroll:
+    # Local build from this fork (card #1629). Build with:
+    #   docker build -t lodge/streamroll:0.1.0 ..
+    image: lodge/streamroll:0.1.0
+    container_name: streamroll
+    restart: unless-stopped
+    ports:
+      # host:container — matches how the other lane-5 media services actually run on
+      # lodge-bad-boy today (bridge + port). Traefik fronts this at cutover.
+      - 3939:3000
+    env_file:
+      - .env
+    environment:
+      - PREROLL_DIR=/media/Pre-Rolls
+      - STING_PATH=/media/Pre-Rolls/netflix.wav
+    volumes:
+      # Media share (Unraid 'media'): finished pre-rolls land in /media/Pre-Rolls,
+      # netflix.wav referenced in place. Host /mnt/media == 10.0.101.3:/mnt/user/media.
+      - /mnt/media:/media
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: 3

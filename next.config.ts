@@ -33,6 +33,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Lodge self-host (#1629): lean standalone server for the container image.
+  output: "standalone",
   async headers() {
     return [
       {

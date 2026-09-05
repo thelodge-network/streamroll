@@ -1,0 +1,29 @@
+# IaC network declaration for lodge-streamroll (card #1629).
+# STATUS: PROPOSED — the IP and the DNS record are a HANNIBAL CUTOVER decision (live DNS is a
+# standing pause item). Do not create the record or assign the IP unilaterally. The NAME is
+# his ruling and is settled: streamroll.thelodge.network.
+service: lodge-streamroll
+lane: 5
+vlan: 101
+ip: 10.0.101.116        # PROPOSED — next free after the lane-5 block (.110–.114); confirm live before assigning
+host: lodge-bad-boy      # runs as a Docker container on the primary host (live reality of lane 5)
+
+dns:
+  internal:
+    # Estate pattern for a Traefik-fronted service: CNAME to lodge-traefik.thelodge.network
+    # (resolves 10.0.101.10) — same as jellyfin.* and seerr.*.
+    - name: streamroll.thelodge.network
+      type: CNAME
+      value: lodge-traefik.thelodge.network
+      status: PROPOSED   # created by Hannibal at cutover, not by an agent
+  external: []
+
+traefik:
+  router: streamroll
+  rule: "Host(`streamroll.thelodge.network`)"
+  service_url: "http://10.0.101.91:3939"   # lodge-bad-boy:3939 (published container port)
+  tls: letsencrypt
+  status: PROPOSED       # add the dynamic-config snippet (deploy/traefik-streamroll.yml) at cutover
+
+firewall: []
+nat: []

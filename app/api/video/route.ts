@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateIntroVideo, type GenerationParams } from "@/lib/runway";
+import { videoProvider } from "@/lib/providers";
 
 export const maxDuration = 300;
 
@@ -8,6 +9,14 @@ export async function POST(req: NextRequest) {
 
   if (!body.imageUrl) {
     return NextResponse.json({ error: "imageUrl is required" }, { status: 400 });
+  }
+
+  // The Google/Veo path is long-running — use the /api/video/start + /api/video/poll flow.
+  if (videoProvider(body.videoModel) === "google") {
+    return NextResponse.json(
+      { error: "Veo (Google) generation uses /api/video/start then /api/video/poll." },
+      { status: 400 }
+    );
   }
 
   const apiKey = req.headers.get("x-runway-key") ?? process.env.RUNWAYML_API_SECRET ?? "";
