@@ -146,8 +146,10 @@ export async function startGoogleVideo(imageUrl: string, params: GenerationParam
       aspectRatio: "16:9",
       resolution: "720p",
       durationSeconds: veoDuration(params.duration),
-      // We mux his own sting (netflix.wav) server-side, so suppress Veo's native audio.
-      generateAudio: false,
+      // NOTE: do NOT set generateAudio here. The Gemini *Developer* API (the key path) rejects
+      // it outright ("generateAudio is only supported in Gemini Enterprise Agent Platform
+      // mode") — verified live 2026-09-05, card #1629. Veo's own audio is harmless because the
+      // save step muxes his sting and maps only Veo's video stream (-map 0:v:0), dropping it.
     },
   });
   if (!op.name) throw new Error("Veo did not return an operation name");
@@ -165,13 +167,26 @@ export interface GooglePollResult {
 }
 
 export async function pollGoogleVideo(opName: string): Promise<GooglePollResult> {
-  const ai = googleClient();
-  // Reconstruct the operation handle from its name — stateless across requests.
-  const op = await ai.operations.getVideosOperation({ operation: { name: opName } as never });
+  // Poll the long-running operation via the REST endpoint directly, NOT the SDK.
+  // ai.operations.getVideosOperation() needs the ORIGINAL GenerateVideosOperation instance —
+  // it calls operation._fromAPIResponse() internally, so a stateless { name } object throws
+  // "_fromAPIResponse is not a function" (verified live 2026-09-05, #1629). The operation name
+  // IS a REST path, so a plain keyed GET is both correct and genuinely stateless across polls.
+  const apiKey = process.env.GOOGLE_AI_API_KEY;
+  if (!apiKey) throw new Error("GOOGLE_AI_API_KEY is not set.");
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/${opName}?key=${apiKey}`);
+  if (!res.ok) return { status: "FAILED", error: `Operation poll HTTP ${res.status}` };
+  const op = await res.json();
   if (!op.done) return { status: "RUNNING" };
-  if (op.error) return { status: "FAILED", error: String(op.error.message ?? op.error) };
-  const video = op.response?.generatedVideos?.[0]?.video;
-  if (!video) return { status: "FAILED", error: "Operation done but no video in response" };
+  if (op.error) return { status: "FAILED", error: String(op.error.message ?? JSON.stringify(op.error)) };
+  // mldev (Developer API) Veo shape: response.generateVideoResponse.generatedSamples[].video.uri
+  // Tolerate the SDK-normalized shape (response.generatedVideos[].video) too.
+  const video =
+    op.response?.generateVideoResponse?.generatedSamples?.[0]?.video ??
+    op.response?.generatedVideos?.[0]?.video;
+  if (!video?.uri && !video?.videoBytes) {
+    return { status: "FAILED", error: "Operation done but no video in response" };
+  }
   return { status: "SUCCEEDED", video };
 }
 
