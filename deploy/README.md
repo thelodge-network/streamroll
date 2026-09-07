@@ -24,18 +24,34 @@ docker build -t lodge/streamroll:0.1.0 .
 cd deploy && cp .env.example .env   # fill GOOGLE_AI_API_KEY from Vaultwarden
 docker compose up -d                 # publishes :3939, mounts /mnt/media -> /media
 ```
-Reachable at `http://10.0.101.91:3939` (or `http://lodge-bad-boy:3939`). Runway users enter
+Reachable at `https://lodgeflix.thelodge.network` (Authelia) or directly at
+`http://10.0.101.91:3939` — 10.0.101.91 IS lodge-bad-boy (`lodge-bad-boy-nic1`), not Lodge02. Runway users enter
 their key at `/setup`; the Google path uses `GOOGLE_AI_API_KEY` server-side.
 
-## CUTOVER (Hannibal-gated — live DNS + IP are standing pause items)
-1. **Google key** — put a *billing-enabled* Google AI Studio key in `deploy/.env` and Vault
-   (the current vault key `253793b5` is free-tier: image quota 0, no Veo; `8fe59ed3` is expired).
-2. **DNS** — create `streamroll.thelodge.network` CNAME → `lodge-traefik.thelodge.network`
-   (Technitium; his call).
-3. **Traefik** — add `deploy/traefik-streamroll.yml` as `route-streamroll.yml` on CT203
-   (in a monorepo worktree; `stacks/traefik/config` is a filetree deploy target).
-4. **Register IaC** — add a `stacks/streamroll/` entry + a `deploy-targets.yml` row (compose
-   shape, host bare-metal `local`, project `streamroll`) so reconcile.py covers it.
+## CUTOVER — DONE 2026-09-07 (card #1629)
+
+All four steps executed by B.A. at Hannibal's direction ("lodgeflix make it happen", which
+settled the standing live-DNS gate). LIVE at **https://lodgeflix.thelodge.network**.
+
+1. **Google key** — RESOLVED. The working key is the `API Token` field on Vaultwarden item
+   **`69985760` "Google AI Studio"**, verified against `GET /v1beta/models` before wiring:
+   `gemini-3-pro-image-preview`, `veo-3.1-generate-preview`, `gemini-2.5-flash-image` all
+   available. *** The keys this README used to name as blockers (`253793b5` free-tier,
+   `8fe59ed3` expired) NO LONGER EXIST — deleted from the vault and deleted upstream on the
+   AI Studio side. Do not go looking for them. ***
+2. **DNS** — `lodgeflix.thelodge.network` CNAME -> `lodge-traefik.thelodge.network`, TTL 3600,
+   via `lodge-lib/technitium.add_record`. DNSSEC signed on write.
+3. **Traefik** — `deploy/traefik-lodgeflix.yml` deployed to CT203 as
+   `/opt/traefik/config/route-lodgeflix.yml` via `lodge-lib/traefik.add_route`. Behind Authelia.
+   That file in this repo is a verified mirror of what is live.
+4. **Register IaC** — STILL OPEN. Add a `stacks/streamroll/` entry + a `deploy-targets.yml` row
+   (compose shape, host bare-metal `local`, project `streamroll`) so reconcile.py covers it.
+
+### Where output goes — two directories on purpose
+`PREROLL_DIR=/media/Pre-Rolls` is the WORKSHOP: it holds `netflix.wav` (the sting the ffmpeg
+mux needs) and every prior render. Jellyfin's Local Intros plugin plays from `/media/intros` —
+copy the keeper across to promote it. Do not point generation straight at `intros`: the mux
+loses its sting and every experiment becomes a pre-roll.
 
 ## Acceptance (card #1629)
 Generate one LODGEFLIX intro end-to-end through the **Google** path (prestige / minimal /

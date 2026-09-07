@@ -1,0 +1,21 @@
+# Traefik dynamic route for LODGEFLIX (card #1629).
+# THIS IS A MIRROR OF WHAT IS LIVE. Deployed 2026-09-07 to lodge-traefik CT203 as
+# /opt/traefik/config/route-lodgeflix.yml via lodge-lib/traefik.add_route.
+# Shape copied verbatim from the live metube route — same host, same auth posture.
+# Estate default is behind Authelia; the arr stack is the documented exception and this is
+# not an arr app, so the middleware stays.
+http:
+  routers:
+    lodgeflix:
+      rule: Host(`lodgeflix.thelodge.network`)
+      entryPoints:
+      - websecure
+      service: lodgeflix
+      tls: {}
+      middlewares:
+      - authelia
+  services:
+    lodgeflix:
+      loadBalancer:
+        servers:
+        - url: http://10.0.101.91:3939

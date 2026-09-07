@@ -1,29 +1,36 @@
-# IaC network declaration for lodge-streamroll (card #1629).
-# STATUS: PROPOSED — the IP and the DNS record are a HANNIBAL CUTOVER decision (live DNS is a
-# standing pause item). Do not create the record or assign the IP unilaterally. The NAME is
-# his ruling and is settled: streamroll.thelodge.network.
-service: lodge-streamroll
+# IaC network declaration for LODGEFLIX (card #1629).
+# STATUS: LIVE as of 2026-09-07. Hannibal ruled the hostname ("lodgeflix make it happen"),
+# which settled the standing live-DNS gate; the record and the Traefik route were then created.
+service: lodge-lodgeflix
 lane: 5
 vlan: 101
-ip: 10.0.101.116        # PROPOSED — next free after the lane-5 block (.110–.114); confirm live before assigning
-host: lodge-bad-boy      # runs as a Docker container on the primary host (live reality of lane 5)
+# NO DEDICATED IP. Runs as a Docker container on lodge-bad-boy using bridge + a published
+# host port, exactly like metube and audiomass. An earlier draft of this file proposed
+# 10.0.101.116 as "next free" — *** that address is now lodge-jellyfin-iptv. Do not action it. ***
+ip: null
+host: lodge-bad-boy       # 10.0.101.91 (lodge-bad-boy-nic1.thelodge.network)
+port: 3939                # host 3939 -> container 3000
 
 dns:
   internal:
     # Estate pattern for a Traefik-fronted service: CNAME to lodge-traefik.thelodge.network
-    # (resolves 10.0.101.10) — same as jellyfin.* and seerr.*.
-    - name: streamroll.thelodge.network
+    # (resolves 10.0.101.10) — same as jellyfin.*, seerr.*, metube.*.
+    - name: lodgeflix.thelodge.network
       type: CNAME
       value: lodge-traefik.thelodge.network
-      status: PROPOSED   # created by Hannibal at cutover, not by an agent
+      ttl: 3600
+      status: LIVE       # created 2026-09-07; DNSSEC signed on write (RRSIG + NSEC)
   external: []
 
 traefik:
-  router: streamroll
-  rule: "Host(`streamroll.thelodge.network`)"
-  service_url: "http://10.0.101.91:3939"   # lodge-bad-boy:3939 (published container port)
-  tls: letsencrypt
-  status: PROPOSED       # add the dynamic-config snippet (deploy/traefik-streamroll.yml) at cutover
+  router: lodgeflix
+  rule: "Host(`lodgeflix.thelodge.network`)"
+  service_url: "http://10.0.101.91:3939"
+  entrypoint: websecure
+  tls: {}                # matches the live route-lodgeflix.yml on CT203
+  middlewares: [authelia]
+  file: /opt/traefik/config/route-lodgeflix.yml
+  status: LIVE           # written 2026-09-07 via lodge-lib/traefik.add_route
 
 firewall: []
 nat: []
