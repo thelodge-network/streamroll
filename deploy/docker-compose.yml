@@ -5,10 +5,9 @@ services:
     image: lodge/streamroll:0.1.0
     container_name: streamroll
     restart: unless-stopped
-    ports:
-      # host:container — matches how the other lane-5 media services actually run on
-      # lodge-bad-boy today (bridge + port). Traefik fronts this at cutover.
-      - 3939:3000
+    networks:
+      lodge-macvlan101:
+        ipv4_address: 10.0.101.119
     env_file:
       - .env
     environment:
@@ -23,3 +22,7 @@ services:
       options:
         max-size: 10m
         max-file: 3
+
+networks:
+  lodge-macvlan101:
+    external: true
