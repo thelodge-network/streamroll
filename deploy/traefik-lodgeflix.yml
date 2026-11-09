@@ -1,6 +1,12 @@
 # Traefik dynamic route for LODGEFLIX (card #1629).
-# THIS IS A MIRROR OF WHAT IS LIVE. Deployed 2026-09-07 to lodge-traefik CT203 as
-# /opt/traefik/config/route-lodgeflix.yml via lodge-lib/traefik.add_route.
+# THIS IS A MIRROR OF WHAT IS LIVE, at /srv/traefik/config/route-lodgeflix.yml on the
+# dockerized Traefik on lodge-bad-boy itself (10.0.101.10 on lodge-macvlan101). Originally
+# deployed 2026-09-07 to lodge-traefik CT203 via lodge-lib/traefik.add_route -- CT203 was
+# retired 2026-09-10 (#1849 repointed traefik.py to the lodge-bad-boy docker deployment) and
+# the route was carried over. backend url corrected 2026-09-19 (#2281) to match the live
+# macvlan address the container has run on since 2026-09-08 (was stale at the old
+# bridge+published-port :3939 address from the original #1629 cutover). Re-verified live via
+# lodge-lib traefik.get_route()/verify_route() at rename time.
 # Shape copied verbatim from the live metube route — same host, same auth posture.
 # Estate default is behind Authelia; the arr stack is the documented exception and this is
 # not an arr app, so the middleware stays.
@@ -18,4 +24,4 @@ http:
     lodgeflix:
       loadBalancer:
         servers:
-        - url: http://10.0.101.91:3939
+        - url: http://lodge-lodgeflix.thelodge.network:3000  # #2454: by name (was 10.0.101.119)

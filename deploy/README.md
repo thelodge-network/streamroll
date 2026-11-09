@@ -22,11 +22,14 @@ docker build -t lodge/streamroll:0.1.0 .
 ## Run (on lodge-bad-boy)
 ```
 cd deploy && cp .env.example .env   # fill GOOGLE_AI_API_KEY from Vaultwarden
-docker compose up -d                 # publishes :3939, mounts /mnt/media -> /media
+docker compose up -d                 # container: lodge-lodgeflix, own address on lodge-macvlan101, no published port
 ```
 Reachable at `https://lodgeflix.thelodge.network` (Authelia) or directly at
-`http://10.0.101.91:3939` — 10.0.101.91 IS lodge-bad-boy (`lodge-bad-boy-nic1`), not Lodge02. Runway users enter
-their key at `/setup`; the Google path uses `GOOGLE_AI_API_KEY` server-side.
+`http://10.0.101.108:3000` — moved off the original bridge+`:3939`-published-port setup onto
+its own macvlan address 2026-09-08 (then .119), and re-addressed to **10.0.101.108** on
+2026-09-21 by the #2454 IPTV re-IP. Prefer the name `lodge-lodgeflix.thelodge.network`, which
+is what the live Traefik backend now uses and what survives the next renumber. Runway users enter their key at `/setup`; the
+Google path uses `GOOGLE_AI_API_KEY` server-side.
 
 ## CUTOVER — DONE 2026-09-07 (card #1629)
 
@@ -41,11 +44,20 @@ settled the standing live-DNS gate). LIVE at **https://lodgeflix.thelodge.networ
    AI Studio side. Do not go looking for them. ***
 2. **DNS** — `lodgeflix.thelodge.network` CNAME -> `lodge-traefik.thelodge.network`, TTL 3600,
    via `lodge-lib/technitium.add_record`. DNSSEC signed on write.
-3. **Traefik** — `deploy/traefik-lodgeflix.yml` deployed to CT203 as
+3. **Traefik** — `deploy/traefik-lodgeflix.yml` originally deployed to CT203 as
    `/opt/traefik/config/route-lodgeflix.yml` via `lodge-lib/traefik.add_route`. Behind Authelia.
-   That file in this repo is a verified mirror of what is live.
-4. **Register IaC** — STILL OPEN. Add a `stacks/streamroll/` entry + a `deploy-targets.yml` row
-   (compose shape, host bare-metal `local`, project `streamroll`) so reconcile.py covers it.
+   CT203 was retired 2026-09-10 (#1849) — Traefik now runs dockerized on lodge-bad-boy itself
+   and the route carried over to `/srv/traefik/config/route-lodgeflix.yml`; backend URL
+   corrected 2026-09-19 (#2281) from the stale `10.0.101.91:3939` to the macvlan address.
+   **The copy in this directory is NO LONGER a mirror of live** — live
+   `/srv/traefik/config/route-lodgeflix.yml` addresses `lodge-lodgeflix.thelodge.network:3000`
+   by name (#2454). Treat `/srv/traefik/config/` as authoritative, not this file.
+4. **Register IaC** — DONE 2026-09-19 (#2281): `stacks/lodgeflix/` in the `thelodge` repo
+   (renamed from `stacks/streamroll/`, which had already been captured 2026-09-19 under
+   #2224 before the canonical name was settled). Live container renamed `streamroll` ->
+   `lodge-lodgeflix` to match at the same time; Nautobot `dns_name` (now on 10.0.101.108) set to
+   `lodge-lodgeflix`. `deploy-targets.yml` row added (`stack: lodgeflix`, compose image-pin
+   coverage, `project: deploy`) so reconcile.py's nightly `c_deploy_drift()` covers it.
 
 ### Where output goes — two directories on purpose
 `PREROLL_DIR=/media/Pre-Rolls` is the WORKSHOP: it holds `netflix.wav` (the sting the ffmpeg

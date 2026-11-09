@@ -4,10 +4,13 @@
 service: lodge-lodgeflix
 lane: 5
 vlan: 101
-# NO DEDICATED IP. Runs as a Docker container on lodge-bad-boy using bridge + a published
-# host port, exactly like metube and audiomass. An earlier draft of this file proposed
-# 10.0.101.116 as "next free" — *** that address is now lodge-jellyfin-iptv. Do not action it. ***
-ip: null
+# HAS a dedicated macvlan address as of 2026-09-08 (.119), re-addressed to 10.0.101.108 by the
+# #2454 IPTV re-IP on 2026-09-21. The "NO DEDICATED IP / bridge + published host port" note that
+# stood here was true only of the original streamroll deployment and is no longer the shape.
+# (An even earlier draft proposed 10.0.101.116 as "next free". .116 is free AGAIN now that
+# jellyfin-catalog moved to .101 — but do not reuse it here; this service has .108.)
+# Prefer the NAME lodge-lodgeflix.thelodge.network over the literal in any consumer.
+ip: 10.0.101.108
 host: lodge-bad-boy       # 10.0.101.91 (lodge-bad-boy-nic1.thelodge.network)
 port: 3939                # host 3939 -> container 3000
 

@@ -1,13 +1,19 @@
 services:
-  streamroll:
+  lodgeflix:
     # Local build from this fork (card #1629). Build with:
     #   docker build -t lodge/streamroll:0.1.0 ..
+    # Image tag stays "lodge/streamroll:0.1.0" -- that's just the build artifact name from
+    # the upstream fork, unrelated to the service identity. Canonical-naming rename #2281:
+    # picked "lodgeflix" (customer-facing hostname/wiki page, ruled live by Hannibal on
+    # #1629 "lodgeflix make it happen") over "streamroll" (upstream project name). Renamed
+    # 2026-09-19: service key + container_name here, Nautobot dns_name, this repo's
+    # stacks/streamroll -> stacks/lodgeflix IaC capture.
     image: lodge/streamroll:0.1.0
-    container_name: streamroll
+    container_name: lodge-lodgeflix
     restart: unless-stopped
     networks:
       lodge-macvlan101:
-        ipv4_address: 10.0.101.119
+        ipv4_address: 10.0.101.108
     env_file:
       - .env
     environment:
